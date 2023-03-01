@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>Hello World</title>
+    <url>/2018/02/10/hello-world/</url>
+    <content><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
+<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p>
+<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+
+<p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p>
+<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+
+<p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p>
+<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
+
+<p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
+]]></content>
+  </entry>
+  <entry>
+    <title>hexo安装部署</title>
+    <url>/2023/01/01/hexo%E5%AE%89%E8%A3%85%E9%83%A8%E7%BD%B2/</url>
+    <content><![CDATA[<h2 id="准备环境"><a href="#准备环境" class="headerlink" title="准备环境"></a>准备环境</h2><p>一台centOs8的服务器，github账号</p>
+<span id="more"></span>
+<h2 id="安装git"><a href="#安装git" class="headerlink" title="安装git"></a>安装git</h2><h3 id="使用yum安装git"><a href="#使用yum安装git" class="headerlink" title="使用yum安装git"></a>使用yum安装git</h3><p>执行yum报错误提示：Failed to download metadata for repo ‘base‘: Cannot download repomd.xml</p>
+<p>查看系统信息</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">cat</span> /etc/redhat-release</span></span><br><span class="line">CentOS Linux release 8.3.2011</span><br></pre></td></tr></table></figure>
+
+<p>更改yum源</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-8.repo</span></span><br></pre></td></tr></table></figure>
+
+<p>安装git</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">sudo yum install git-core</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="配置git基本信息"><a href="#配置git基本信息" class="headerlink" title="配置git基本信息"></a>配置git基本信息</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">git config --global user.email <span class="string">&quot;you@example.com&quot;</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">git config --global user.name <span class="string">&quot;Your Name&quot;</span></span></span><br></pre></td></tr></table></figure>
+
+<h3 id="使用ssh登录git"><a href="#使用ssh登录git" class="headerlink" title="使用ssh登录git"></a>使用ssh登录git</h3><p>生成ssh密钥文件</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">ssh-keygen -t rsa -C <span class="string">&quot;你的GitHub注册邮箱&quot;</span></span></span><br></pre></td></tr></table></figure>
+
+<p>三个回车后，查看id_rsa.pub文件，复制内容</p>
+<p>打开github的ssh配置页面，新建new SSH Key，值为刚刚复制的内容</p>
+<p>检测GitHub公钥设置是否成功</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">ssh git@github.com</span></span><br><span class="line">PTY allocation request failed on channel 0</span><br><span class="line">Hi Liannala! You&#x27;ve successfully authenticated, but GitHub does not provide shell access.</span><br><span class="line">Connection to github.com closed.</span><br></pre></td></tr></table></figure>
+
+<p><strong>warning</strong>：PTY allocation request failed on channel 0，提示伪终端请求失败</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">The “PTY allocation request failed” warning is innocuous when using command-line ssh </span><br><span class="line">to login to a service that does not provide normal interactive access. </span><br><span class="line">Git-over-SSH does not need a tty and GitHub’s SSH service is configured </span><br><span class="line">to refuse to allocate one for incoming connections. </span><br><span class="line">You can tell ssh not to ask for a tty with ssh -T git@github.com.</span><br></pre></td></tr></table></figure>
+
+<p>这个警告没有影响，它会出现是当使用命令行 SSH 登录了一个不提供正常交互式访问的服务。<br>基于 SSH 的 Git 不需要一个 tty, GitHub（GitLab 也应该一样）的 SSH 服务被配置成拒绝分配一个 tty 给入站连接。<br>你可以告诉 SSH 不要请求一个 tty，使用<code>ssh -T</code>的选项。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">ssh -T git@github.com</span></span><br><span class="line">Hi Liannala! You&#x27;ve successfully authenticated, but GitHub does not provide shell access.</span><br></pre></td></tr></table></figure>
+
+<p>一切正常</p>
+<h2 id="安装nodejs"><a href="#安装nodejs" class="headerlink" title="安装nodejs"></a>安装nodejs</h2><p>通过nodesource安装nodejs</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">curl -fsSL https://rpm.nodesource.com/setup_19.x | bash -</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">sudo yum install -y nodejs</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="安装hexo"><a href="#安装hexo" class="headerlink" title="安装hexo"></a>安装hexo</h2><p>使用npm安装hexo</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">npm install -g hexo-cli</span></span><br></pre></td></tr></table></figure>
+
+<p>安装以后，可以使用以下两种方式执行 Hexo：</p>
+<p>1、<code>npx hexo &lt;command&gt;</code></p>
+<p>2、将 Hexo 所在的目录下的 <code>node_modules</code> 添加到环境变量之中即可直接使用 <code>hexo &lt;command&gt;</code></p>
+<p>这里采用第二种方式</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">echo</span> <span class="string">&#x27;PATH=&quot;$PATH:./node_modules/.bin&quot;&#x27;</span> &gt;&gt; ~/.profile</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="建站"><a href="#建站" class="headerlink" title="建站"></a>建站</h2><h3 id="创建相关文件夹"><a href="#创建相关文件夹" class="headerlink" title="创建相关文件夹"></a>创建相关文件夹</h3><p>安装 Hexo 完成后，请执行下列命令，Hexo 将会在指定文件夹中新建所需要的文件。</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">hexo init &lt;folder&gt;</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="built_in">cd</span> &lt;folder&gt;</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">npm install</span></span><br></pre></td></tr></table></figure>
+
+<p>新建blog文件夹，初始化</p>
+<figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">hexo init blog</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="创建新的文章"><a href="#创建新的文章" class="headerlink" title="创建新的文章"></a>创建新的文章</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">hexo new hello_world</span></span><br><span class="line">INFO  Validating config</span><br><span class="line">INFO  Created: /blog/source/_posts/hello-world-1.md</span><br></pre></td></tr></table></figure>
+
+<h3 id="生成静态文件"><a href="#生成静态文件" class="headerlink" title="生成静态文件"></a>生成静态文件</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">hexo g</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="发布"><a href="#发布" class="headerlink" title="发布"></a>发布</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">hexo s</span></span><br><span class="line">INFO  Validating config</span><br><span class="line">INFO  Start processing</span><br><span class="line">INFO  Hexo is running at http://localhost:4000/ . Press Ctrl+C to stop.</span><br></pre></td></tr></table></figure>
+
+<p>发布完成后，需要开放服务器4000端口，这样就可以用外网访问了</p>
+<h2 id="关联github"><a href="#关联github" class="headerlink" title="关联github"></a>关联github</h2><h3 id="安装git部署插件hexo-deployer-git"><a href="#安装git部署插件hexo-deployer-git" class="headerlink" title="安装git部署插件hexo-deployer-git"></a>安装git部署插件hexo-deployer-git</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">npm install hexo-deployer-git --save</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="打开配置文件-config-yml，修改deploy配置"><a href="#打开配置文件-config-yml，修改deploy配置" class="headerlink" title="打开配置文件_config.yml，修改deploy配置"></a>打开配置文件_config.yml，修改deploy配置</h3><figure class="highlight yml"><table><tr><td class="code"><pre><span class="line"><span class="attr">deploy:</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">git</span></span><br><span class="line">  <span class="attr">repo:</span> <span class="string">https://github.com/&lt;username&gt;/&lt;project&gt;</span></span><br><span class="line">  <span class="comment"># example, https://github.com/hexojs/hexojs.github.io</span></span><br><span class="line">  <span class="comment"># 如果配置了ssh，使用ssh的链接即可</span></span><br><span class="line">  <span class="comment"># git@github.com:hexojs/hexojs.github.io.git</span></span><br><span class="line">  <span class="attr">branch:</span> <span class="string">master</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="部署网站"><a href="#部署网站" class="headerlink" title="部署网站"></a>部署网站</h3><figure class="highlight shell"><table><tr><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">hexo clean</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">hexo g</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">hexo deploy</span></span><br></pre></td></tr></table></figure>
+
+<p>完成后，打开浏览器，在地址栏输入你放置的个人网站的仓库路径，即<a href="http://xxx.github.io/">http://xxx.github.io</a></p>
+<h3 id="绑定域名"><a href="#绑定域名" class="headerlink" title="绑定域名"></a>绑定域名</h3><p>解析域名</p>
+]]></content>
+      <tags>
+        <tag>hexo</tag>
+        <tag>安装</tag>
+      </tags>
+  </entry>
+</search>
