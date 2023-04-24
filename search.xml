@@ -3,7 +3,122 @@
   <entry>
     <title>having解析</title>
     <url>/2022/01/01/having%E8%A7%A3%E6%9E%90/</url>
-    <content><![CDATA[<h1 id="一、having"><a href="#一、having" class="headerlink" title="一、having"></a>一、having</h1><h2 id="1、having子句语法"><a href="#1、having子句语法" class="headerlink" title="1、having子句语法"></a>1、having子句语法</h2><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> column1, column2, ... </span><br><span class="line"><span class="keyword">FROM</span> <span class="keyword">table</span></span><br><span class="line"><span class="keyword">GROUP</span> <span class="keyword">BY</span> column1, column2, ...</span><br><span class="line"><span class="keyword">HAVING</span> <span class="keyword">condition</span>;</span><br><span class="line"></span><br><span class="line"><span class="operator">&lt;</span><span class="operator">!</span><span class="comment">-- more --&gt;</span></span><br><span class="line">其中，<span class="keyword">SELECT</span>语句表示要查询的列，<span class="keyword">FROM</span>子句表示要查询的表，<span class="keyword">GROUP</span> <span class="keyword">BY</span>子句表示要对查询结果进行分组的列，<span class="keyword">HAVING</span>子句表示要对分组后的结果进行过滤的条件。</span><br><span class="line"></span><br><span class="line">## <span class="number">2</span>、注意事项</span><br><span class="line"></span><br><span class="line"><span class="keyword">HAVING</span>子句有一些事项需要注意：</span><br><span class="line"></span><br><span class="line">（<span class="number">1</span>）分组列必须在<span class="keyword">SELECT</span>语句中出现：使用<span class="keyword">GROUP</span> <span class="keyword">BY</span>子句分组时，分组列必须在<span class="keyword">SELECT</span>语句中出现，否则会出现语法错误。</span><br><span class="line"></span><br><span class="line">（<span class="number">2</span>）聚合函数不能用于<span class="keyword">WHERE</span>子句：使用聚合函数时，不能在<span class="keyword">WHERE</span>子句中使用，因为<span class="keyword">WHERE</span>子句在聚合函数之前执行。</span><br><span class="line"></span><br><span class="line">（<span class="number">3</span>）<span class="keyword">HAVING</span>子句不能使用别名：<span class="keyword">HAVING</span>子句不能使用<span class="keyword">SELECT</span>语句中定义的别名，因为别名是在<span class="keyword">SELECT</span>语句之后计算的。</span><br><span class="line"></span><br><span class="line">（<span class="number">4</span>）<span class="keyword">HAVING</span>子句的条件必须是聚合函数：<span class="keyword">HAVING</span>子句的条件必须是聚合函数，而不能是普通的列名。</span><br><span class="line"></span><br><span class="line">（<span class="number">5</span>）<span class="keyword">HAVING</span>并不一定需要<span class="keyword">GROUP</span> <span class="keyword">BY</span>（可以参考使用场景：存在缺失的编号）。</span><br><span class="line"></span><br><span class="line">（<span class="number">6</span>）<span class="keyword">WHERE</span>面向的是行，<span class="keyword">HAVING</span>面向的是集合。</span><br><span class="line"></span><br><span class="line">（<span class="number">7</span>）过滤条件中有聚合函数时，则过滤条件必须声明在<span class="keyword">HAVING</span>中；如果没有，则建议写在<span class="keyword">WHERE</span>中，因为<span class="keyword">WHERE</span>的执行效率要高于<span class="keyword">HAVING</span>。</span><br><span class="line"></span><br><span class="line">（<span class="number">8</span>）分组操作会把分组的结果聚合成一条记录，而窗口函数（MySQL <span class="number">8.0</span>开始支持）是将结果置于每一条数据记录中。</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># 二、准备表数据</span><br><span class="line"></span><br><span class="line">## <span class="number">1</span>、SeqTb</span><br><span class="line"></span><br><span class="line"><span class="operator">|</span> id   <span class="operator">|</span> name  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> :<span class="comment">--- | :---- |</span></span><br><span class="line"><span class="operator">|</span> <span class="number">1</span>    <span class="operator">|</span> 迪克  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">2</span>    <span class="operator">|</span> 安    <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">3</span>    <span class="operator">|</span> 莱露  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">5</span>    <span class="operator">|</span> 卡    <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">6</span>    <span class="operator">|</span> 玛丽  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">8</span>    <span class="operator">|</span> 本    <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">9</span>    <span class="operator">|</span> <span class="keyword">NULL</span>  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">10</span>   <span class="operator">|</span> hi    <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">13</span>   <span class="operator">|</span> hello <span class="operator">|</span></span><br><span class="line"></span><br><span class="line">## <span class="number">2</span>、Graduates</span><br><span class="line"></span><br><span class="line"><span class="operator">|</span> id   <span class="operator">|</span> name   <span class="operator">|</span> income <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> :<span class="comment">--- | :----- | :----- |</span></span><br><span class="line"><span class="operator">|</span> <span class="number">1</span>    <span class="operator">|</span> 桑普森 <span class="operator">|</span> <span class="number">40000</span>  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">2</span>    <span class="operator">|</span> 迈克   <span class="operator">|</span> <span class="number">30000</span>  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">3</span>    <span class="operator">|</span> 怀特   <span class="operator">|</span> <span class="number">20000</span>  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">4</span>    <span class="operator">|</span> 阿诺德 <span class="operator">|</span> <span class="number">20000</span>  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">5</span>    <span class="operator">|</span> 史密斯 <span class="operator">|</span> <span class="number">20000</span>  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">6</span>    <span class="operator">|</span> 劳伦斯 <span class="operator">|</span> <span class="number">15000</span>  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">7</span>    <span class="operator">|</span> 哈德逊 <span class="operator">|</span> <span class="number">15000</span>  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">8</span>    <span class="operator">|</span> 肯特   <span class="operator">|</span> <span class="number">10000</span>  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">9</span>    <span class="operator">|</span> 贝特   <span class="operator">|</span> <span class="number">10000</span>  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">10</span>   <span class="operator">|</span> 斯科特 <span class="operator">|</span> <span class="number">10000</span>  <span class="operator">|</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># 三、使用场景</span><br><span class="line"></span><br><span class="line">## <span class="number">1</span>、存在缺失的编号（<span class="keyword">HAVING</span>不一定必须有<span class="keyword">GROUP</span> <span class="keyword">BY</span>）</span><br><span class="line"></span><br><span class="line">```<span class="keyword">sql</span></span><br><span class="line"><span class="comment">-- 如果有查询结果，说明存在缺失的编号</span></span><br><span class="line"><span class="keyword">select</span> <span class="number">1</span> <span class="keyword">as</span> gap</span><br><span class="line"><span class="keyword">from</span> SeqTb</span><br><span class="line"><span class="keyword">having</span> <span class="built_in">count</span>(<span class="operator">*</span>) <span class="operator">&lt;&gt;</span> <span class="built_in">max</span>(id)</span><br></pre></td></tr></table></figure>
+    <content><![CDATA[<h1 id="一、having"><a href="#一、having" class="headerlink" title="一、having"></a>一、having</h1><h2 id="1、having子句语法"><a href="#1、having子句语法" class="headerlink" title="1、having子句语法"></a>1、having子句语法</h2><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> column1, column2, ... </span><br><span class="line"><span class="keyword">FROM</span> <span class="keyword">table</span></span><br><span class="line"><span class="keyword">GROUP</span> <span class="keyword">BY</span> column1, column2, ...</span><br><span class="line"><span class="keyword">HAVING</span> <span class="keyword">condition</span>;</span><br></pre></td></tr></table></figure>
+<span id="more"></span>
+<p>其中，SELECT语句表示要查询的列，FROM子句表示要查询的表，GROUP BY子句表示要对查询结果进行分组的列，HAVING子句表示要对分组后的结果进行过滤的条件。</p>
+<h2 id="2、注意事项"><a href="#2、注意事项" class="headerlink" title="2、注意事项"></a>2、注意事项</h2><p>HAVING子句有一些事项需要注意：</p>
+<p>（1）分组列必须在SELECT语句中出现：使用GROUP BY子句分组时，分组列必须在SELECT语句中出现，否则会出现语法错误。</p>
+<p>（2）聚合函数不能用于WHERE子句：使用聚合函数时，不能在WHERE子句中使用，因为WHERE子句在聚合函数之前执行。</p>
+<p>（3）HAVING子句不能使用别名：HAVING子句不能使用SELECT语句中定义的别名，因为别名是在SELECT语句之后计算的。</p>
+<p>（4）HAVING子句的条件必须是聚合函数：HAVING子句的条件必须是聚合函数，而不能是普通的列名。</p>
+<p>（5）HAVING并不一定需要GROUP BY（可以参考使用场景：存在缺失的编号）。</p>
+<p>（6）WHERE面向的是行，HAVING面向的是集合。</p>
+<p>（7）过滤条件中有聚合函数时，则过滤条件必须声明在HAVING中；如果没有，则建议写在WHERE中，因为WHERE的执行效率要高于HAVING。</p>
+<p>（8）分组操作会把分组的结果聚合成一条记录，而窗口函数（MySQL 8.0开始支持）是将结果置于每一条数据记录中。</p>
+<h1 id="二、准备表数据"><a href="#二、准备表数据" class="headerlink" title="二、准备表数据"></a>二、准备表数据</h1><h2 id="1、SeqTb"><a href="#1、SeqTb" class="headerlink" title="1、SeqTb"></a>1、SeqTb</h2><table>
+<thead>
+<tr>
+<th align="left">id</th>
+<th align="left">name</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">1</td>
+<td align="left">迪克</td>
+</tr>
+<tr>
+<td align="left">2</td>
+<td align="left">安</td>
+</tr>
+<tr>
+<td align="left">3</td>
+<td align="left">莱露</td>
+</tr>
+<tr>
+<td align="left">5</td>
+<td align="left">卡</td>
+</tr>
+<tr>
+<td align="left">6</td>
+<td align="left">玛丽</td>
+</tr>
+<tr>
+<td align="left">8</td>
+<td align="left">本</td>
+</tr>
+<tr>
+<td align="left">9</td>
+<td align="left">NULL</td>
+</tr>
+<tr>
+<td align="left">10</td>
+<td align="left">hi</td>
+</tr>
+<tr>
+<td align="left">13</td>
+<td align="left">hello</td>
+</tr>
+</tbody></table>
+<h2 id="2、Graduates"><a href="#2、Graduates" class="headerlink" title="2、Graduates"></a>2、Graduates</h2><table>
+<thead>
+<tr>
+<th align="left">id</th>
+<th align="left">name</th>
+<th align="left">income</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">1</td>
+<td align="left">桑普森</td>
+<td align="left">40000</td>
+</tr>
+<tr>
+<td align="left">2</td>
+<td align="left">迈克</td>
+<td align="left">30000</td>
+</tr>
+<tr>
+<td align="left">3</td>
+<td align="left">怀特</td>
+<td align="left">20000</td>
+</tr>
+<tr>
+<td align="left">4</td>
+<td align="left">阿诺德</td>
+<td align="left">20000</td>
+</tr>
+<tr>
+<td align="left">5</td>
+<td align="left">史密斯</td>
+<td align="left">20000</td>
+</tr>
+<tr>
+<td align="left">6</td>
+<td align="left">劳伦斯</td>
+<td align="left">15000</td>
+</tr>
+<tr>
+<td align="left">7</td>
+<td align="left">哈德逊</td>
+<td align="left">15000</td>
+</tr>
+<tr>
+<td align="left">8</td>
+<td align="left">肯特</td>
+<td align="left">10000</td>
+</tr>
+<tr>
+<td align="left">9</td>
+<td align="left">贝特</td>
+<td align="left">10000</td>
+</tr>
+<tr>
+<td align="left">10</td>
+<td align="left">斯科特</td>
+<td align="left">10000</td>
+</tr>
+</tbody></table>
+<h1 id="三、使用场景"><a href="#三、使用场景" class="headerlink" title="三、使用场景"></a>三、使用场景</h1><h2 id="1、存在缺失的编号（HAVING不一定必须有GROUP-BY）"><a href="#1、存在缺失的编号（HAVING不一定必须有GROUP-BY）" class="headerlink" title="1、存在缺失的编号（HAVING不一定必须有GROUP BY）"></a>1、存在缺失的编号（HAVING不一定必须有GROUP BY）</h2><figure class="highlight sql"><table><tr><td class="code"><pre><span class="line"><span class="comment">-- 如果有查询结果，说明存在缺失的编号</span></span><br><span class="line"><span class="keyword">select</span> <span class="number">1</span> <span class="keyword">as</span> gap</span><br><span class="line"><span class="keyword">from</span> SeqTb</span><br><span class="line"><span class="keyword">having</span> <span class="built_in">count</span>(<span class="operator">*</span>) <span class="operator">&lt;&gt;</span> <span class="built_in">max</span>(id)</span><br></pre></td></tr></table></figure>
 
 <p>结果：</p>
 <table>
